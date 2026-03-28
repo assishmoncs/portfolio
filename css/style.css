@@ -58,18 +58,115 @@ html {
 
 body {
   min-height: 100vh;
-  background: linear-gradient(180deg, var(--bg), var(--bg2) 48%, var(--bg) 100%);
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.65;
   overflow-x: hidden;
   transition: background var(--transition), color var(--transition);
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fixed animated mesh — SaaS-style depth behind content */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.ambient-gradient {
+  position: absolute;
+  inset: -25%;
+  background:
+    radial-gradient(ellipse 95% 75% at 12% 18%, rgba(255, 122, 89, 0.26), transparent 58%),
+    radial-gradient(ellipse 85% 65% at 88% 72%, rgba(85, 214, 255, 0.22), transparent 52%),
+    radial-gradient(ellipse 70% 55% at 48% 108%, rgba(18, 36, 63, 0.85), transparent 55%),
+    linear-gradient(168deg, var(--bg) 0%, var(--bg2) 42%, var(--bg3) 100%);
+  animation: ambientGradientMove 26s ease-in-out infinite alternate;
+}
+
+[data-theme="light"] .ambient-gradient {
+  background:
+    radial-gradient(ellipse 95% 75% at 12% 18%, rgba(255, 122, 89, 0.14), transparent 58%),
+    radial-gradient(ellipse 85% 65% at 88% 72%, rgba(85, 214, 255, 0.12), transparent 52%),
+    radial-gradient(ellipse 70% 55% at 50% 100%, rgba(232, 238, 247, 0.95), transparent 55%),
+    linear-gradient(168deg, var(--bg) 0%, var(--bg2) 45%, #ffffff 100%);
+}
+
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(76px);
+  opacity: 0.5;
+  mix-blend-mode: screen;
+  animation: blobDrift 24s ease-in-out infinite;
+}
+
+[data-theme="light"] .ambient-blob {
+  mix-blend-mode: multiply;
+  opacity: 0.35;
+}
+
+.ambient-blob--1 {
+  width: min(58vw, 520px);
+  height: min(58vw, 520px);
+  left: -12%;
+  top: 8%;
+  background: radial-gradient(circle, rgba(255, 122, 89, 0.5), transparent 70%);
+}
+
+.ambient-blob--2 {
+  width: min(48vw, 420px);
+  height: min(48vw, 420px);
+  right: -6%;
+  top: 38%;
+  background: radial-gradient(circle, rgba(85, 214, 255, 0.42), transparent 68%);
+  animation-delay: -8s;
+  animation-duration: 28s;
+}
+
+.ambient-blob--3 {
+  width: min(42vw, 380px);
+  height: min(42vw, 380px);
+  left: 32%;
+  bottom: -8%;
+  background: radial-gradient(circle, rgba(122, 92, 255, 0.28), transparent 72%);
+  animation-delay: -14s;
+  animation-duration: 32s;
+}
+
+[data-theme="light"] .ambient-blob--3 {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 72%);
+}
+
+.ambient-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+[data-theme="light"] .ambient-grain {
+  opacity: 0.025;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 img {
@@ -113,17 +210,20 @@ button {
   justify-content: space-between;
   padding: 0 clamp(20px, 5vw, 60px);
   z-index: 1000;
-  transition: background var(--transition), backdrop-filter var(--transition), box-shadow var(--transition);
+  transition: background var(--transition), backdrop-filter var(--transition), box-shadow var(--transition), border-color var(--transition);
 }
 
 .nav.scrolled {
-  background: rgba(7, 17, 31, 0.76);
-  backdrop-filter: blur(18px);
+  background: rgba(7, 17, 31, 0.55);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
   box-shadow: 0 1px 0 var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="light"] .nav.scrolled {
-  background: rgba(244, 247, 251, 0.8);
+  background: rgba(244, 247, 251, 0.72);
+  border-bottom-color: rgba(12, 28, 61, 0.06);
 }
 
 .nav-logo {
@@ -284,6 +384,7 @@ button {
 
 section {
   position: relative;
+  z-index: 1;
 }
 
 .section-head {
@@ -431,6 +532,80 @@ section {
 .hero-text {
   opacity: 0;
   transform: translateX(30px);
+  max-width: 640px;
+  width: 100%;
+  justify-self: end;
+}
+
+/* Glassmorphism panel — primary SaaS-style content surface */
+.hero-glass {
+  position: relative;
+  border-radius: calc(var(--radius) + 10px);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(26px) saturate(175%);
+  -webkit-backdrop-filter: blur(26px) saturate(175%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 12px 48px rgba(2, 8, 23, 0.38),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  overflow: hidden;
+}
+
+[data-theme="light"] .hero-glass {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(12, 28, 61, 0.1);
+  box-shadow:
+    0 16px 48px rgba(15, 23, 42, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+.hero-glass-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    118deg,
+    transparent 36%,
+    rgba(255, 255, 255, 0.09) 48%,
+    transparent 58%
+  );
+  pointer-events: none;
+}
+
+[data-theme="light"] .hero-glass-shine {
+  background: linear-gradient(
+    118deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.65) 50%,
+    transparent 62%
+  );
+}
+
+.hero-glass-inner {
+  position: relative;
+  z-index: 1;
+  padding: clamp(26px, 4.2vw, 42px) clamp(24px, 3.8vw, 40px);
+}
+
+@keyframes ambientGradientMove {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    transform: translate(-2.5%, 1.8%) rotate(2.5deg) scale(1.05);
+  }
+}
+
+@keyframes blobDrift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(4%, -6%) scale(1.04);
+  }
+  66% {
+    transform: translate(-5%, 4%) scale(0.96);
+  }
 }
 
 .hero-greeting {
@@ -478,8 +653,8 @@ section {
   font-family: var(--font-display);
   font-size: clamp(2.15rem, 4.1vw, 3.35rem);
   font-weight: 800;
-  line-height: 1.03;
-  letter-spacing: -0.03em;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
 }
 
 .cursor-blink {
@@ -507,11 +682,12 @@ section {
 }
 
 .hero-sub {
-  max-width: 580px;
+  max-width: 36em;
   margin-bottom: 34px;
-  font-size: clamp(1rem, 1.9vw, 1.08rem);
+  font-size: clamp(1.02rem, 1.95vw, 1.12rem);
   color: var(--text2);
-  line-height: 1.85;
+  line-height: 1.75;
+  letter-spacing: -0.01em;
 }
 
 .hero-cta {
@@ -711,7 +887,7 @@ section {
 }
 
 .skills {
-  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.02) 50%, transparent);
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.03) 50%, transparent);
 }
 
 .skills-tabs {
@@ -947,7 +1123,7 @@ section {
 }
 
 .contact {
-  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.02) 50%, transparent);
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.03) 50%, transparent);
 }
 
 .contact-intro {
@@ -1082,6 +1258,8 @@ section {
 }
 
 .footer {
+  position: relative;
+  z-index: 1;
   padding: 34px clamp(20px, 5vw, 60px) 48px;
   border-top: 1px solid var(--border);
   background: color-mix(in srgb, var(--bg2) 80%, transparent);
@@ -1128,7 +1306,6 @@ section {
 [data-theme="light"] .footer-copy {
   color: #435775;
 }
-
 
 .section-reveal {
   opacity: 0;
@@ -1180,6 +1357,11 @@ textarea {
   .hero-cta,
   .hero-stats {
     justify-content: center;
+  }
+
+  .hero-text {
+    justify-self: center;
+    max-width: min(100%, 560px);
   }
 
   .nav-links {
