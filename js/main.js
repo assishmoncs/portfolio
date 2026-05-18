@@ -569,6 +569,11 @@
       this.tabs.forEach(tab => {
         tab.addEventListener('click', () => this.switchTab(tab));
       });
+
+      const activeTab = document.querySelector('.tab-btn.active') || this.tabs[0];
+      if (activeTab) {
+        this.switchTab(activeTab);
+      }
     }
 
     switchTab(activeTab) {
