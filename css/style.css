@@ -141,11 +141,6 @@ body {
     linear-gradient(135deg, #02050b 0%, #07101f 48%, #020409 100%);
 }
 
-body > :not(.glass-background) {
-  position: relative;
-  z-index: 1;
-}
-
 [data-theme="light"] .glass-background {
   background:
     radial-gradient(circle at 18% 18%, rgba(0, 145, 255, 0.16), transparent 28%),
