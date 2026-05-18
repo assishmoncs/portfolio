@@ -562,6 +562,8 @@
     constructor() {
       this.tabs = document.querySelectorAll('.tab-btn');
       this.panels = document.querySelectorAll('.skills-panel');
+      this.activePanel = null;
+      this.barObserver = null;
       this.init();
     }
 
@@ -572,11 +574,18 @@
 
       const activeTab = document.querySelector('.tab-btn.active') || this.tabs[0];
       if (activeTab) {
-        this.switchTab(activeTab);
+        this.activateTab(activeTab, { animate: false });
       }
+
+      this.initBarObserver();
+      requestAnimationFrame(() => this.animateActivePanelIfVisible());
     }
 
     switchTab(activeTab) {
+      this.activateTab(activeTab, { animate: true });
+    }
+
+    activateTab(activeTab, { animate = true } = {}) {
       const target = activeTab.dataset.tab;
 
       // Update tabs
@@ -588,13 +597,48 @@
         panel.classList.remove('active');
         if (panel.id === `tab-${target}`) {
           panel.classList.add('active');
-          
-          // Animate skill bars
-          panel.querySelectorAll('.skill-card').forEach((card, i) => {
-            card.classList.remove('in-view');
-            setTimeout(() => card.classList.add('in-view'), i * 80);
-          });
+          this.activePanel = panel;
         }
+      });
+
+      if (animate) {
+        requestAnimationFrame(() => this.animatePanel(this.activePanel));
+      }
+    }
+
+    initBarObserver() {
+      const skillsSection = document.getElementById('skills');
+      if (!skillsSection || !('IntersectionObserver' in window)) return;
+
+      this.barObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            this.animatePanel(this.activePanel);
+          }
+        });
+      }, { threshold: 0.25 });
+
+      this.barObserver.observe(skillsSection);
+    }
+
+    animateActivePanelIfVisible() {
+      const skillsSection = document.getElementById('skills');
+      if (!skillsSection) return;
+
+      const rect = skillsSection.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+
+      if (isVisible) {
+        this.animatePanel(this.activePanel);
+      }
+    }
+
+    animatePanel(panel) {
+      if (!panel) return;
+
+      panel.querySelectorAll('.skill-card').forEach((card, i) => {
+        card.classList.remove('in-view');
+        setTimeout(() => card.classList.add('in-view'), i * 80);
       });
     }
   }
