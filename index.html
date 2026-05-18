@@ -15,25 +15,29 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Interactive Background -->
-  <canvas id="particle-canvas"></canvas>
-  
-  <!-- Ambient Background -->
-  <div class="ambient-bg" aria-hidden="true">
-    <div class="ambient-gradient"></div>
+  <!-- Animated Glass Background -->
+  <div class="glass-background" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="glow glow-primary"></div>
+    <div class="glow glow-secondary"></div>
+    <div class="glass-layer layer-back">
+      <div class="glass-shape shape-orb shape-1"></div>
+      <div class="glass-shape shape-hex shape-2"></div>
+      <div class="glass-shape shape-poly shape-3"></div>
+    </div>
+    <div class="glass-layer layer-mid">
+      <div class="glass-shape shape-triangle shape-4"></div>
+      <div class="glass-shape shape-orb shape-5"></div>
+      <div class="glass-shape shape-hex shape-6"></div>
+      <div class="glass-shape shape-ring shape-7"></div>
+    </div>
+    <div class="glass-layer layer-front">
+      <div class="glass-shape shape-accent shape-8"></div>
+      <div class="glass-shape shape-accent shape-9"></div>
+      <div class="glass-shape shape-ring shape-10"></div>
+    </div>
+    <div class="noise-overlay"></div>
   </div>
-  
-  <!-- Floating Geometric Shapes -->
-  <div class="geometric-shapes" aria-hidden="true">
-    <div class="shape shape-ring"></div>
-    <div class="shape shape-ring-2"></div>
-    <div class="shape shape-square"></div>
-    <div class="shape shape-triangle"></div>
-    <div class="shape shape-dots"></div>
-  </div>
-  
-  <!-- Cursor Spotlight -->
-  <div class="cursor-spotlight" aria-hidden="true"></div>
 
   <!-- Navigation -->
   <nav class="nav" id="mainNav">

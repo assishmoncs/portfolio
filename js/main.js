@@ -1,6 +1,6 @@
 /**
  * Portfolio Interactive System
- * Features: Particle Network, Text Scramble, Magnetic Buttons, Scroll Animations
+ * Features: Text Scramble, Magnetic Buttons, Scroll Animations
  */
 
 (function() {
@@ -10,13 +10,6 @@
   // Configuration
   // ==========================================
   const CONFIG = {
-    particles: {
-      count: 60,
-      connectionDistance: 150,
-      mouseDistance: 200,
-      speed: 0.5,
-      color: 'rgba(99, 102, 241, 0.5)'
-    },
     animations: {
       staggerDelay: 100,
       revealThreshold: 0.1
@@ -36,171 +29,8 @@
           fn.apply(this, args);
         }
       };
-    },
-
-    debounce: (fn, wait) => {
-      let timeout;
-      return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => fn.apply(this, args), wait);
-      };
-    },
-
-    lerp: (start, end, factor) => start + (end - start) * factor,
-
-    random: (min, max) => Math.random() * (max - min) + min,
-
-    clamp: (value, min, max) => Math.min(Math.max(value, min), max)
+    }
   };
-
-  // ==========================================
-  // Particle Network Background
-  // ==========================================
-  class ParticleNetwork {
-    constructor() {
-      this.canvas = document.getElementById('particle-canvas');
-      if (!this.canvas) return;
-      
-      this.ctx = this.canvas.getContext('2d');
-      this.particles = [];
-      this.mouse = { x: null, y: null };
-      this.animationId = null;
-      this.isActive = true;
-      
-      this.init();
-    }
-
-    init() {
-      this.resize();
-      this.createParticles();
-      this.bindEvents();
-      this.animate();
-    }
-
-    resize() {
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
-    }
-
-    createParticles() {
-      this.particles = [];
-      const count = window.matchMedia('(pointer: coarse)').matches 
-        ? Math.floor(CONFIG.particles.count / 2) 
-        : CONFIG.particles.count;
-      
-      for (let i = 0; i < count; i++) {
-        this.particles.push({
-          x: Math.random() * this.canvas.width,
-          y: Math.random() * this.canvas.height,
-          vx: (Math.random() - 0.5) * CONFIG.particles.speed,
-          vy: (Math.random() - 0.5) * CONFIG.particles.speed,
-          radius: Math.random() * 2 + 1
-        });
-      }
-    }
-
-    bindEvents() {
-      window.addEventListener('resize', utils.debounce(() => {
-        this.resize();
-        this.createParticles();
-      }, 250));
-
-      window.addEventListener('mousemove', utils.throttle((e) => {
-        this.mouse.x = e.clientX;
-        this.mouse.y = e.clientY;
-      }, 16));
-
-      window.addEventListener('mouseleave', () => {
-        this.mouse.x = null;
-        this.mouse.y = null;
-      });
-
-      // Pause when tab is hidden
-      document.addEventListener('visibilitychange', () => {
-        this.isActive = document.visibilityState === 'visible';
-        if (this.isActive) this.animate();
-      });
-    }
-
-    drawParticle(particle) {
-      this.ctx.beginPath();
-      this.ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-      this.ctx.fillStyle = CONFIG.particles.color;
-      this.ctx.fill();
-    }
-
-    drawConnections() {
-      for (let i = 0; i < this.particles.length; i++) {
-        let connections = 0;
-        
-        for (let j = i + 1; j < this.particles.length; j++) {
-          const dx = this.particles[i].x - this.particles[j].x;
-          const dy = this.particles[i].y - this.particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < CONFIG.particles.connectionDistance && connections < 3) {
-            const opacity = (1 - distance / CONFIG.particles.connectionDistance) * 0.3;
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = `rgba(99, 102, 241, ${opacity})`;
-            this.ctx.lineWidth = 0.5;
-            this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
-            this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
-            this.ctx.stroke();
-            connections++;
-          }
-        }
-      }
-    }
-
-    updateParticles() {
-      this.particles.forEach(particle => {
-        // Mouse interaction
-        if (this.mouse.x !== null && this.mouse.y !== null) {
-          const dx = this.mouse.x - particle.x;
-          const dy = this.mouse.y - particle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < CONFIG.particles.mouseDistance) {
-            const force = (CONFIG.particles.mouseDistance - distance) / CONFIG.particles.mouseDistance;
-            particle.vx += (dx / distance) * force * 0.02;
-            particle.vy += (dy / distance) * force * 0.02;
-          }
-        }
-
-        // Update position
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-
-        // Boundary check
-        if (particle.x < 0 || particle.x > this.canvas.width) particle.vx *= -1;
-        if (particle.y < 0 || particle.y > this.canvas.height) particle.vy *= -1;
-
-        // Damping
-        particle.vx = utils.clamp(particle.vx, -2, 2);
-        particle.vy = utils.clamp(particle.vy, -2, 2);
-        particle.vx *= 0.99;
-        particle.vy *= 0.99;
-      });
-    }
-
-    animate() {
-      if (!this.isActive) return;
-      
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      
-      this.updateParticles();
-      this.drawConnections();
-      this.particles.forEach(p => this.drawParticle(p));
-      
-      this.animationId = requestAnimationFrame(() => this.animate());
-    }
-
-    destroy() {
-      if (this.animationId) {
-        cancelAnimationFrame(this.animationId);
-      }
-    }
-  }
 
   // ==========================================
   // Text Scramble Effect
@@ -314,52 +144,6 @@
   }
 
   // ==========================================
-  // Cursor Spotlight Effect
-  // ==========================================
-  class CursorSpotlight {
-    constructor() {
-      this.spotlight = document.querySelector('.cursor-spotlight');
-      if (!this.spotlight) return;
-      
-      this.mouse = { x: 0, y: 0 };
-      this.current = { x: 0, y: 0 };
-      this.isActive = true;
-      
-      this.init();
-    }
-
-    init() {
-      document.addEventListener('mousemove', utils.throttle((e) => {
-        this.mouse.x = e.clientX;
-        this.mouse.y = e.clientY;
-      }, 16));
-
-      document.addEventListener('mouseleave', () => {
-        this.spotlight.style.opacity = '0';
-      });
-
-      document.addEventListener('mouseenter', () => {
-        this.spotlight.style.opacity = '1';
-      });
-
-      this.animate();
-    }
-
-    animate() {
-      if (!this.isActive) return;
-      
-      // Smooth follow
-      this.current.x = utils.lerp(this.current.x, this.mouse.x, 0.1);
-      this.current.y = utils.lerp(this.current.y, this.mouse.y, 0.1);
-      
-      this.spotlight.style.left = `${this.current.x}px`;
-      this.spotlight.style.top = `${this.current.y}px`;
-      
-      requestAnimationFrame(() => this.animate());
-    }
-  }
-
-  // ==========================================
   // Scroll Animations
   // ==========================================
   class ScrollAnimations {
@@ -371,7 +155,6 @@
     init() {
       this.initSectionReveal();
       this.initStaggerAnimations();
-      this.initParallax();
     }
 
     initSectionReveal() {
@@ -419,26 +202,6 @@
       this.observers.push(observer);
     }
 
-    initParallax() {
-      const shapes = document.querySelectorAll('.shape');
-      if (!shapes.length) return;
-
-      let ticking = false;
-      
-      window.addEventListener('scroll', () => {
-        if (!ticking) {
-          requestAnimationFrame(() => {
-            const scrollY = window.scrollY;
-            shapes.forEach((shape, i) => {
-              const speed = 0.05 + (i * 0.02);
-              shape.style.transform = `translateY(${scrollY * speed}px)`;
-            });
-            ticking = false;
-          });
-          ticking = true;
-        }
-      }, { passive: true });
-    }
   }
 
   // ==========================================
@@ -547,11 +310,6 @@
       
       this.html.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
-      
-      // Update particle color
-      CONFIG.particles.color = next === 'dark' 
-        ? 'rgba(99, 102, 241, 0.5)' 
-        : 'rgba(99, 102, 241, 0.3)';
     }
   }
 
@@ -778,8 +536,6 @@
     document.body.prepend(progressBar);
 
     // Initialize all modules
-    new ParticleNetwork();
-    new CursorSpotlight();
     new Navigation();
     new ThemeManager();
     new ScrollAnimations();
