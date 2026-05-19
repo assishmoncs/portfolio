@@ -709,6 +709,20 @@ section {
   transform: translateY(-2px);
 }
 
+/* Outline / Download button (subtle, matches secondary style) */
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.btn-outline:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
 .btn svg {
   width: 18px;
   height: 18px;
